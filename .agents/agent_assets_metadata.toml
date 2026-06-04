@@ -1,0 +1,20 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "-svhDHcGyV6fMXfgtb_fF"
+uri = "file://culte-enfants-deploy.tar.gz"
+type = "unspecified"
+title = "APC Assist — Code source complet (prêt au déploiement)"
+
+[[outputs]]
+id = "mwgaaa6BvYVqPpDiJQpMB"
+uri = "file://render-deploy.tar.gz"
+type = "unspecified"
+title = "APC Assist — Prêt à déployer sur Render"
+
+[[outputs]]
+id = "rROi_tHZ7yB7otbHWdhZ4"
+uri = "file://railway-deploy.tar.gz"
+type = "unspecified"
+title = "APC Assist — Prêt à déployer sur Railway"

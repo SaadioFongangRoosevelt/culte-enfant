@@ -1,0 +1,259 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: Culte d'Enfants - Préparation de leçon APC API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: lessons
+    description: Gestion des leçons préparées
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /lessons:
+    get:
+      operationId: listLessons
+      tags: [lessons]
+      summary: Liste toutes les leçons sauvegardées
+      responses:
+        "200":
+          description: Liste des leçons
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Lesson"
+    post:
+      operationId: createLesson
+      tags: [lessons]
+      summary: Sauvegarder une leçon préparée
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LessonInput"
+      responses:
+        "201":
+          description: Leçon sauvegardée
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Lesson"
+
+  /lessons/{id}:
+    get:
+      operationId: getLesson
+      tags: [lessons]
+      summary: Obtenir une leçon par ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Leçon trouvée
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Lesson"
+        "404":
+          description: Leçon introuvable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+    delete:
+      operationId: deleteLesson
+      tags: [lessons]
+      summary: Supprimer une leçon
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Leçon supprimée
+        "404":
+          description: Leçon introuvable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /lessons/generate:
+    post:
+      operationId: generateLesson
+      tags: [lessons]
+      summary: Générer une préparation de leçon avec l'IA (SSE streaming)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LessonGenerationInput"
+      responses:
+        "200":
+          description: Flux SSE de la préparation générée
+          content:
+            text/event-stream: {}
+
+  /lessons/stats:
+    get:
+      operationId: getLessonsStats
+      tags: [lessons]
+      summary: Statistiques des leçons sauvegardées
+      responses:
+        "200":
+          description: Statistiques
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LessonsStats"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    Lesson:
+      type: object
+      properties:
+        id:
+          type: integer
+        titre:
+          type: string
+        reference:
+          type: string
+        trancheAge:
+          type: string
+          enum: [petits, moyens, grands]
+        sequence:
+          type: integer
+        contenu:
+          type: string
+          description: JSON stringifié contenant tous les éléments de la préparation
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - titre
+        - reference
+        - trancheAge
+        - sequence
+        - contenu
+        - createdAt
+
+    LessonInput:
+      type: object
+      properties:
+        titre:
+          type: string
+        reference:
+          type: string
+        trancheAge:
+          type: string
+          enum: [petits, moyens, grands]
+        sequence:
+          type: integer
+        contenu:
+          type: string
+      required:
+        - titre
+        - reference
+        - trancheAge
+        - sequence
+        - contenu
+
+    LessonGenerationInput:
+      type: object
+      properties:
+        titre:
+          type: string
+          description: Titre de la leçon
+        reference:
+          type: string
+          description: Référence biblique (ex. Jean 3:16)
+        trancheAge:
+          type: string
+          enum: [petits, moyens, grands]
+          description: Tranche d'âge des enfants
+        sequence:
+          type: integer
+          minimum: 1
+          maximum: 4
+          description: Numéro de la séquence (1, 2, 3 ou 4)
+        contexteLecon:
+          type: ["string", "null"]
+          description: Contexte ou notes supplémentaires optionnelles
+      required:
+        - titre
+        - reference
+        - trancheAge
+        - sequence
+
+    LessonsStats:
+      type: object
+      properties:
+        total:
+          type: integer
+        parSequence:
+          type: object
+          properties:
+            sequence1: { type: integer }
+            sequence2: { type: integer }
+            sequence3: { type: integer }
+            sequence4: { type: integer }
+          required: [sequence1, sequence2, sequence3, sequence4]
+        parTranche:
+          type: object
+          properties:
+            petits: { type: integer }
+            moyens: { type: integer }
+            grands: { type: integer }
+          required: [petits, moyens, grands]
+        recentes:
+          type: array
+          items:
+            $ref: "#/components/schemas/Lesson"
+      required:
+        - total
+        - parSequence
+        - parTranche
+        - recentes
+
+    ApiError:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
