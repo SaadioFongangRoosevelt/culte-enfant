@@ -3,7 +3,7 @@ services:
     name: culte-enfants-apc
     runtime: node
     plan: free
-    buildCommand: npm install -g pnpm@10 && pnpm install && pnpm --filter @workspace/culte-enfants run build && pnpm --filter @workspace/api-server run build
+    buildCommand: npx pnpm@10 install && npx pnpm@10 --filter @workspace/culte-enfants run build && npx pnpm@10 --filter @workspace/api-server run build
     startCommand: node artifacts/api-server/dist/index.mjs
     envVars:
       - key: NODE_ENV
