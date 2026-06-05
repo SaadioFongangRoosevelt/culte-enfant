@@ -37,9 +37,8 @@ if (process.env.NODE_ENV === "production") {
   const staticDir = path.resolve(process.cwd(), "artifacts/culte-enfants/dist/public");
   if (existsSync(staticDir)) {
     app.use(express.static(staticDir));
-    app.get("*", (_req, res) => {
-      res.sendFile(path.join(staticDir, "index.html"));
-    });
+    app.get('/{*path}', (req, res) => {
+  res.sendFile(path.join(staticDir, "index.html"))});
   }
 }
 
